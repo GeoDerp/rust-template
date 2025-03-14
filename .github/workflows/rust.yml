@@ -3,9 +3,9 @@ name: Rust CI Pipeline
 on: [push, pull_request]
 
 env:
-  DOCKER_IMAGE_NAME: ""
-  SONAR_ORGANIZATION: ""
-  SONAR_PROJECT_KEY: ""
+  DOCKER_IMAGE_NAME: "rust-template"
+  SONAR_ORGANIZATION: "geoderp"
+  SONAR_PROJECT_KEY: "GeoDerp_rust-template"
   PROJECT_DIR: "."
   
 jobs:
