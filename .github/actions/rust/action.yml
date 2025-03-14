@@ -23,6 +23,7 @@ inputs:
   docker_image_name:
     description: 'Docker image name'
     required: true
+    default: ${{ github.event.repository.name }}
 
 runs:
   using: 'composite'
@@ -48,9 +49,11 @@ runs:
 
     - name: Build binaries in release mode
       run: cargo build --profile release --verbose --workspace
+      shell: bash
     
     - name: Run tests in release mode
       run: cargo test --profile release --verbose cargo test 
+      shell: bash
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarqube-scan-action@v5.0.0
