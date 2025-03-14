@@ -52,7 +52,7 @@ runs:
       shell: bash
     
     - name: Run tests in release mode
-      run: cargo test --profile release --verbose cargo test 
+      run: cargo test --profile release --verbose --workspace
       shell: bash
 
     - name: SonarCloud Scan
