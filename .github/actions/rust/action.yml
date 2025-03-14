@@ -23,7 +23,6 @@ inputs:
   docker_image_name:
     description: 'Docker image name'
     required: true
-    default: ${{ github.event.repository.name }}
 
 runs:
   using: 'composite'
