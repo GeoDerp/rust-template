@@ -23,7 +23,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Run Custom Rust CI action
-      uses: "${{ github.workspace }}/.github/actions/rust/action.yml"
+      uses: ./.github/actions/rust
       with: 
         github_token: ${{ secrets.GITHUB_TOKEN }}
         gitleaks_token: ${{ secrets.GITLEAKS_TOKEN }}
