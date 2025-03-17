@@ -1,8 +1,8 @@
 FROM registry.access.redhat.com/ubi9/ubi:latest
 
 RUN dnf update -y; \
-# Install git, nano 
-dnf install git nano -y; \
+# Install git, nano , gcc , gcc-c++
+dnf install git nano gcc gcc-c++ -y; \
 # Install nodejs for SonarQube 
 dnf install nodejs -y; \
 # clear cache
