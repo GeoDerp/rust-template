@@ -8,12 +8,6 @@ inputs:
   gitleaks_token:
     description: 'Organisational token for Gitleaks'
     required: false # only required for Organizations, not personal accounts
-  sonar_token:
-    description: 'Token for SonarCloud access'
-    required: true
-  sonar_args:
-    description: 'Custom SonarCloud arguments'
-    required: true
   dockerhub_username:
     description: 'Username for the Dockerhub account'
     required: true
@@ -24,6 +18,12 @@ inputs:
     description: 'Docker image name'
     required: true
 
+permissions:
+  # Required to upload SARIF file to CodeQL. See: https://github.com/github/codeql-action/issues/2117
+  actions: read
+  contents: read
+  security-events: write
+
 runs:
   using: 'composite'
   steps:
@@ -32,7 +32,6 @@ runs:
       id: branch-names
       shell: bash
       run: echo "current_branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-
 
     - name: Checkout code
       uses: actions/checkout@v4
@@ -56,20 +55,25 @@ runs:
       run: cargo test --profile release --verbose --workspace
       shell: bash
 
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarqube-scan-action@v5.0.0
+    # Install and run Semgrep scan
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        args: ${{ inputs.sonar_args }}
-      env: 
-        SONAR_TOKEN: ${{ inputs.sonar_token }}
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-
-    - name: Clean up .scannerwork folder
-      # Sonarcloud schedules cleanup at END of workflow, if another action does a checkout before this, it will break.
-      # This is a workaround, details here: https://github.com/SonarSource/sonarqube-scan-action/issues/22#issuecomment-1906822668
-      shell: bash
-      run: |
-        sudo rm -rf .scannerwork
+        python-version: '3.11'
+    - name: Install Semgrep
+      run: pip install semgrep
+    - name: Run Semgrep scan and output to Github Security
+      working-directory: ${{ inputs.source_dir }}
+      run: semgrep scan --sarif -o semgrep-output.sarif --oss-only
+    - name: Upload SARIF report to GitHub (even if previous step failed)
+      if: always()
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ inputs.source_dir }}/semgrep-output.sarif
+        category: semgrep
+    - name: Run Semgrep scan and fail on issues
+      working-directory: ${{ inputs.source_dir }}
+      run: semgrep scan --severity ERROR --severity WARNING --oss-only
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3

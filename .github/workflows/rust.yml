@@ -1,11 +1,9 @@
 name: Rust CI Pipeline
 
-on: [push, pull_request]
+on: [push]
 
 env:
   DOCKER_IMAGE_NAME: ""
-  SONAR_ORGANIZATION: "geoderp"
-  SONAR_PROJECT_KEY: "GeoDerp_rust-template"
   
 jobs:
   build:
@@ -21,16 +19,12 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
     - name: Run Custom Rust CI action
       uses: ./.github/actions/rust
       with: 
         github_token: ${{ secrets.GITHUB_TOKEN }}
         gitleaks_token: ${{ secrets.GITLEAKS_TOKEN }}
-        sonar_token: ${{ secrets.SONAR_TOKEN }}
-        sonar_args: >
-          -D sonar.organization=${{ env.SONAR_ORGANIZATION }}
-          -D sonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
-          -D sonar.sources=${{ env.PYTHON_APP_SOURCE_DIR }}
         dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
         dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
         docker_image_name: ${{ env.DOCKER_IMAGE_NAME || github.event.repository.name }}
